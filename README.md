@@ -226,12 +226,12 @@ Control of two-layer adaptation uses slip probabilbity from ProbabilisticContact
 
 1.  `w0` line 36, /maestro/src/Leg.cpp file.
 2. `alpha`  /maestro/launch/basic.launch file.
-
+## Project Diagram
 <div align="center">
 <br />
    <h3 align="center">Maestro Project Diagram</h3> 
   <a href="https://github.com/despargy/maestro">
-    <img src="go1_description/figures/Maestro-5.drawio.png" alt="Go1" width="532" height="262">
+    <img src="go1_description/figures/Maestro-5.drawio.png" alt="Go1" width="709" height="350">
   </a>
 
 </div>
