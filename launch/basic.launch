@@ -19,9 +19,9 @@
         <arg name="debug" default="false"/>
         <include file="$(find gazebo_ros)/launch/empty_world.launch">
             <!-- 1leg slip-->
-            <arg name="world_name" value="$(find maestro)/worlds/$(arg wname).world"/> 
+            <!-- <arg name="world_name" value="$(find maestro)/worlds/$(arg wname).world"/>  -->
             <!-- 4leg slip-->
-            <!-- <arg name="world_name" value="$(find maestro)/worlds/$(arg wnameGlobal).world"/>  -->
+            <arg name="world_name" value="$(find maestro)/worlds/$(arg wnameGlobal).world"/> 
             <arg name="debug" value="$(arg debug)"/>
             <arg name="gui" value="$(arg gui)"/>
             <arg name="paused" value="$(arg paused)"/>

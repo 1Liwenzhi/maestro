@@ -1,5 +1,9 @@
 #! /usr/bin/env python3
-
+#用于估计机器人RL(左后腿)是否稳定接触地面的ROS节点
+# 主要使用的传感器是IMU（惯性测量单元），通过计算传感器在不同轴上的加速度值和角速度值来判断机器人的腿部是否与地面稳定接触。
+# 这个节点使用了一种基于核密度估计的算法来计算接触稳定性的概率。
+# 具体而言，节点使用一个预定义的阈值来确定机器人腿部的加速度和角速度是否在正常范围内，然后使用高斯核密度估计来估计IMU读数的概率分布。
+# 最后，将不同轴上的概率分别乘起来，得到一个总的接触稳定性概率值，并将其发布到ROS话题上。
 # ROS libraries
 import rospy
 
@@ -13,7 +17,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.neighbors import KernelDensity
 
-path =  '/home/despargy/go1_ws/src/maestro/src/contact_estimation/contacts/params.csv'
+path =  '/home/robot/ros_workpace/test_ws/src/maestro/src/contact_estimation/contacts/params.csv'
 a = np.loadtxt(path,delimiter=",", dtype=str)
 
 a = np.delete(a,0,axis = 0)

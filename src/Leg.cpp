@@ -34,7 +34,7 @@ namespace RCD
         // Leg Weights based on Slip Prob 
         prob_stab = 1.0; // init as stable contact
         w0=35.0;
-        wv_leg = w0*Eigen::Vector3d::Ones();  
+        wv_leg = w0*Eigen::Vector3d::Ones();  //初始权重，这时候相当于已经把Z方向的接触概率设置为1
     }
     void Leg::kdlSolver()
     {

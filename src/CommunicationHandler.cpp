@@ -63,7 +63,7 @@ namespace RCD
             this->robot_->mass = 13.1; // if is real exp. cmh changes it to 12.0kg 
             this->robot_->gc << 0,0,this->robot_->mass*this->robot_->g_gravity,0,0,0;
             // pbc offset
-            this->robot_->pbc_x = 0.0025;
+            this->robot_->pbc_x = 0.0025;//质心偏置
             // select topics
             this->lowcmd_topic = this->SIM_LOWCMD_TOPIC; // Select the simulation topics
             this->lowstate_topic = this->SIM_LOWSTATE_TOPIC; // Select the simulation topics
@@ -71,7 +71,7 @@ namespace RCD
             
             this->sub_CoMState_ = nh_cmh_->subscribe(this->modelstate_topic, 1, &RCD::CommunicationHandler::CoMStateCallback, this); // diff. Cb
         
-            if(this->SLIP_DETECTION)
+            if(this->SLIP_DETECTION)//滑动检测
             {
                 this->sub_Slip0_ = nh_slip_->subscribe(this->slip_0_topic, 1, &RCD::CommunicationHandler::lowSlip0Callback, this);
                 this->sub_Slip1_ = nh_slip_->subscribe(this->slip_1_topic, 1, &RCD::CommunicationHandler::lowSlip1Callback, this);
@@ -93,7 +93,7 @@ namespace RCD
 
             this->sub_CoMState_ = nh_cmh_->subscribe(this->modelstate_topic, 1, &RCD::CommunicationHandler::RealCoMStateCallback, this); // diff. Cb
             
-            if(this->SLIP_DETECTION)
+            if(this->SLIP_DETECTION)//滑动检测
             {
                 this->sub_Slip0_ = nh_slip_->subscribe(this->slip_0_topic, 1, &RCD::CommunicationHandler::lowSlip0Callback, this);
                 this->sub_Slip1_ = nh_slip_->subscribe(this->IMU_REAL_EXP_topic, 1, &RCD::CommunicationHandler::lowSlip1Callback, this);
@@ -107,7 +107,7 @@ namespace RCD
         sub_Control_ = nh_cmh_->subscribe(this->control_topic, 1, &RCD::CommunicationHandler::controlCallback, this);
 
         ////////////////////////////// PUBLISH ROTATION //////////////////////////////
-            // Contact Friction Cones
+            // Contact Friction Cones 接触摩擦锥
             this->pub_FootR_ = nh_cmh_->advertise<std_msgs::Float32MultiArray>(this->FOOTR_TOPIC,1);
             this->dat.layout.dim.push_back(std_msgs::MultiArrayDimension());
             this->dat.layout.dim.push_back(std_msgs::MultiArrayDimension());

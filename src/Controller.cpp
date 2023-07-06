@@ -3,11 +3,12 @@
 namespace RCD
 {
                 /* CONSTRUCTOR - DE  */
-
+    //无参构造函数
     Controller::Controller()
     {
         ROS_INFO("Controller Constructor");
     }
+    //有参构造函数
     Controller::Controller(Robot* robot, CommunicationHandler* cmh, DataHandler* data_handler)
     {
         ROS_INFO("Controller Constructor");
@@ -35,7 +36,7 @@ namespace RCD
         if (!this->cmh_->nh_main_->getParam( this->ns + "/main_path", this->data_handler_->main_path)){
             ROS_ERROR("No main_path given in namespace: '%s')", this->cmh_->nh_main_->getNamespace().c_str());
         }
-        // Pass Tree form URDF
+        // Pass Tree form URDF (Kinematics and Dynamics Library)
         this->loadTree();
         // pas num of joints
         robot_->num_joints = 12;//robot_kin.getNrOfJoints();   // CHANGED AFTER EXTRA FOOT ADDED TO SIMULATED IMU
@@ -44,11 +45,12 @@ namespace RCD
         this->e_v.resize(6);
 
     }
+    //析构函数
     Controller::~Controller()
     {
         std::cout<<"Controller De-Constructor"<<std::endl;
     }
-
+    //初始化控制器
     void Controller::initControl()
     {
         // Init Leg manager for each leg
@@ -66,12 +68,13 @@ namespace RCD
         // init vvvv
         for(int l = 0; l < this->n_leg ; l++)
         {
-            // update vvvv vector of robot                          // z stays 1.0 do not change
+            // update vvvv vector of robot  z stays 1.0 do not change
             this->robot_->vvvv.block(l*3,0,3,1) = this->leg_mng[l].wv_leg;   
         }
         // save as matrix the inverse of diagonal vvvv vector
         this->robot_->W_inv = (this->robot_->vvvv.asDiagonal()).inverse();
     }
+    //初始化数据管理器
     void Controller::initDataHandler()
     {
                         /* Robot var. to be logged */
@@ -101,6 +104,7 @@ namespace RCD
         // d_tv pointer 
         this->data_handler_->log_data.d_tv = &(this->d_tv);       
     }
+    //初始化腿部控制器
     void Controller::initLegsControl()
     {
         // 4 Leg controller
@@ -112,6 +116,7 @@ namespace RCD
         // if (this->n_leg*leg_mng[0].n_superV_joints != robot_->num_joints)  //eq. joint distribution, 3 per leg this cannot be used becasue we add extra foot link for fake imu data
         // ROS_ERROR("Robot Joints Number Not Matching");
     }
+    //获取关节角，及足端力
     void Controller::getLegQF()
     {
         // robot state updates automatically
@@ -128,6 +133,7 @@ namespace RCD
             leg_mng[i].f(2) = this->robot_->low_state_.eeForce[leg_mng[i].id].z;          
         }
     }
+    //获取雅可比矩阵及足端位置
     void Controller::solveJacP()
     {   
         // robot state updates automatically
@@ -139,21 +145,23 @@ namespace RCD
             this->robot_->LegR_frame[l] = leg_mng[l].p.matrix().block(0,0,3,3);
         }
     }
+    //第一层自适应，计算每条腿X、Y方向上的权重,最后组成W_inv
     void Controller::computeWeights(double dt)
     {
 
         for(int l = 0; l < this->n_leg ; l++)
-        {
-            this->leg_mng[l].prob_stab = std::fmin(this->cmh_->slip[l],1.0)/1.0;
+        {   //基于prob计算权值用于滑移检测
+            this->leg_mng[l].prob_stab = std::fmin(this->cmh_->slip[l],1.0)/1.0;//稳定触地概率
             this->leg_mng[l].wv_leg(1) = this->alpha*(1.0 - this->leg_mng[l].prob_stab)*dt + this->leg_mng[l].wv_leg(1) ; // y
             this->leg_mng[l].wv_leg(0) = this->alpha*(1.0 - this->leg_mng[l].prob_stab)*dt + this->leg_mng[l].wv_leg(0); // x
             
             // update vvvv vector of robot                          // z stays 1.0 do not change
-            this->robot_->vvvv.block(l*3,0,3,1) = this->leg_mng[l].wv_leg;   
+            this->robot_->vvvv.block(l*3,0,3,1) = this->leg_mng[l].wv_leg;   //填充W权重矩阵12*12，
         }
         // save as matrix the inverse of diagonal vvvv vector
-        this->robot_->W_inv = (this->robot_->vvvv.asDiagonal()).inverse();
+        this->robot_->W_inv = (this->robot_->vvvv.asDiagonal()).inverse();//求逆矩阵并保存
     }
+    //计算大G矩阵（动力学转换矩阵）
     void Controller::computeSudoGq()
     {
         // compute Gq eq. 2
@@ -165,6 +173,7 @@ namespace RCD
         // compute Gp_sude eq. 7
         this->robot_->Gq_sudo = this->robot_->W_inv * this->robot_->Gq.transpose()*(this->robot_->Gq*this->robot_->W_inv*this->robot_->Gq.transpose()).inverse() ;
     }
+    //设置Maestro下的电机参数
     void Controller::setMaestroMotorGains()
     {
         if(!cmh_->real_experiment_)
@@ -213,16 +222,17 @@ namespace RCD
             }
         }
     }
+    //运行到起始位置(在站起来之前设定好开始的姿势)
     void Controller::startingPose()
     {
         // For real robot to get the frst low state data
         if(this->cmh_->real_experiment_)
         {
             std::cout<<"IS REAL firstCommandForRealRobot"<<std::endl;
-            this->firstCommandForRealRobot();
+            this->firstCommandForRealRobot();//阻尼状态3秒
         }
         // Motor Params
-        this->initMotorParamsHard();
+        this->initMotorParamsHard();//设置正常的电机参数
 
         // gravity compensation change tau // SIMULATION ONLY
         ROS_INFO("gravComp(): starts");
@@ -238,6 +248,7 @@ namespace RCD
 
 
     }
+    //重力补偿
     void Controller::gravComp()
     {
         // gravity compensation
@@ -246,6 +257,7 @@ namespace RCD
         this->next_LowCmd_.motorCmd[6].tau = -0.65f;  //RR_0
         this->next_LowCmd_.motorCmd[9].tau = +0.65f; //RL_0
     }
+    //控制器循环
     void Controller::loop()
     {   
         // set dt    
@@ -254,8 +266,8 @@ namespace RCD
 
         ros::Duration sleep_dt_ROS = ros::Duration(0.002);
 
-        this->tv = 0.0;
-        this->d_tv = 1.0;
+        this->tv = 0.0;//缩放时间参数
+        this->d_tv = 1.0;//初始化缩放时间参数变化率，默认不缩放
         
         double t_to_use = 0.0; // will take values from t_real or virtual time tv
 
@@ -319,6 +331,7 @@ namespace RCD
             }
 
             // give dt or keep old time to compute ros dt?
+            //使用真实时间还是缩放时间取决于第二层自适应
             this->t_real += this->dt;
             t_to_use = this->t_real;
 
@@ -415,6 +428,7 @@ namespace RCD
             
         }
     }
+    //计算时间尺度系数Beta_t
     void Controller::computeBeta_t()
     {
         double slope = 0.0001;
@@ -422,6 +436,7 @@ namespace RCD
         std::cout<<"wwww  "<< this->robot_->vvvv.transpose() << " ------- "<<"d_tv  "<< d_tv<<std::endl;
 
     }
+    //更新哥氏力矩阵H_c、C_c 惯性矩阵I_c
     void Controller::updateControlLaw(Eigen::Vector3d w_com)
     {
         // compute sudo Gq
@@ -431,6 +446,7 @@ namespace RCD
         this->robot_->H_c.block(3,3,3,3) =  this->robot_->I_c ; 
         this->robot_->C_c.block(3,3,3,3) = this->math_lib.scewSymmetric(this->robot_->I_c*w_com);
     }
+    //将世界坐标系下的足端力转化为基坐标系下的足端力
     void Controller::forceTrasform()
     {
         for(int l = 0 ; l < n_leg ; l++)
@@ -438,6 +454,7 @@ namespace RCD
             this->leg_mng[l].f_tf_toBase = this->robot_->R_c*this->leg_mng[l].p.matrix().block(0,0,3,3)*this->leg_mng[l].f;
         }
     }
+    //设置电机力矩，并发送出去
     void Controller::setNewCmd()
     {
         for(int l = 0; l < this->n_leg ; l++)
@@ -448,6 +465,7 @@ namespace RCD
         }
         cmh_->sendLowCmd(this->next_LowCmd_);
     }
+    //更新(当前的关节角，足端力，雅可比矩阵，足端位置)
     void Controller::updateLegs()
     {   
         // get current leg info Joint Qs and footForces
@@ -455,6 +473,7 @@ namespace RCD
         // solve Jacs etc. for each leg
         this->solveJacP();
     }
+    //加载运动学树用于获取雅可比矩阵及足端位置
     void Controller::loadTree()
     {
         // read URDF from parameter server and parse it into a KDL::Tree
@@ -462,6 +481,7 @@ namespace RCD
         throw std::runtime_error("Could not find robot URDF in parameter '/robot_description'.");
     }
                 /* FUNCTIONS FROM  BODY.CPP */
+    //初始化电机参数
     void Controller::initMotorParamsHard()
     {
         next_LowCmd_.head[0] = 0xFE;
@@ -522,6 +542,7 @@ namespace RCD
         }
 
     }
+    //设置站立目标关节角
     void Controller::standUp()
     {   
         double pos[robot_->num_joints] = {0.0, 0.67, -1.3, -0.0, 0.67, -1.3, 
@@ -529,6 +550,7 @@ namespace RCD
         moveDesiredQs(pos, 2*1000);
 
     }
+    //移动到期望的关节角位置，即站立
     void Controller::moveDesiredQs(double* targetPos, double duration)
     {
         double pos[robot_->num_joints] ,lastPos[robot_->num_joints], percent;
@@ -551,6 +573,7 @@ namespace RCD
         }
 
     }
+    //第一次在real_robot上运行设置(机器人会处于阻尼状态3秒)
     void Controller::firstCommandForRealRobot()
     {
         next_LowCmd_.head[0] = 0xFE;

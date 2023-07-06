@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-
+#用于估计机器人RR(右后腿)是否稳定接触地面的ROS节点
 # ROS libraries
 import rospy
 
@@ -13,7 +13,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.neighbors import KernelDensity
 
-path =  '/home/despargy/go1_ws/src/maestro/src/contact_estimation/contacts/params.csv'
+path =  '/home/robot/ros_workpace/test_ws/src/maestro/src/contact_estimation/contacts/params.csv'
 a = np.loadtxt(path,delimiter=",", dtype=str)
 
 a = np.delete(a,0,axis = 0)

@@ -11,7 +11,7 @@ namespace RCD
     {
         std::cout<<"DataHandler De-Constructor"<<std::endl;
     }
-
+    // logfile对象代表了一个输出流，他将数据写入到一个文件中
     void DataHandler::logData()
     {
         logfile
@@ -29,9 +29,10 @@ namespace RCD
             (*log_data.p_d)(0)<<"," << (*log_data.p_d)(1)<<"," << (*log_data.p_d)(2)<<"," <<      
             (*log_data.leg_prob_0)<<"," << (*log_data.leg_prob_1)<<"," << (*log_data.leg_prob_2)<<"," << (*log_data.leg_prob_3)<<"\n" ;              
     }
+    //CSV文件通常由逗号分隔的值组成，因此可以使用逗号作为分隔符来解析每个值。
     void DataHandler::openOnce()
     {
-        logfile.open(main_path + "Log.csv");
+        logfile.open(main_path + "Log.csv");//打开Log.csv文件
         logfile
               // time, virtual, d_virtual
                 << "t_real, tv, d_tv, "

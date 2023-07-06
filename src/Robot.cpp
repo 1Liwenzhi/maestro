@@ -23,7 +23,7 @@ namespace RCD
         this->C_c.resize(6,6);
         // init I
         Eigen::Vector3d ii(0.02, 0.07, 0.08); //inetria tensor
-        this->I = ii.asDiagonal();
+        this->I = ii.asDiagonal();//惯性张量
         // init H_c
         this->H_c.block(0,0,3,3) = this->mass*Eigen::Matrix3d::Identity();
         this->H_c.block(3,3,3,3) = Eigen::Matrix3d::Zero(); // will later be set based on Rc*Ic*Rc.t() 
@@ -74,10 +74,12 @@ namespace RCD
     // {
     //     this->motor_cmd_ = motor_cmd;
     // }
+    //设置底层状态
     void Robot::setLowState(unitree_legged_msgs::LowState low_state)
     {
         this->low_state_ = low_state;
     }
+    //设置机器人的质心位置和姿态
     void Robot::setCoMfromMState(geometry_msgs::Pose com_state)
     {
         this->p_c(0) = com_state.position.x;

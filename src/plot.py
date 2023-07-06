@@ -5,7 +5,8 @@ from matplotlib import pyplot as plt
 # Import math Library
 import math 
 
-data = np.genfromtxt("/home/despargy/go1_ws/src/maestro/CSV/Log.csv", delimiter=",", skip_header=1) #TODO
+data = np.genfromtxt("/home/robot/ros_workpace/test_ws/src/maestro/CSV/Log.csv", delimiter=",", skip_header=1) #TODO
+# data = np.genfromtxt("/home/robot/ros_workpace/test_ws/src/maestro/SavedCSVfromExperiments/Simulation/adapt-4slip/Log.csv", delimiter=",", skip_header=1) #TODO
 
 # times
 t_real = data[:,0]

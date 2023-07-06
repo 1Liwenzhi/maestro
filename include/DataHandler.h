@@ -3,7 +3,7 @@
 #include <Leg.h>
 #include <iostream>
 #include <fstream>
-#include<vector>
+#include <vector>
 #include <string>
 
 #ifndef _DATAHANDLER_H_

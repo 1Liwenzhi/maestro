@@ -12,6 +12,7 @@ namespace RCD
     {
         std::cout<<"MathLibrary De-Constructor"<<std::endl;
     }
+    // 求反对称矩阵
     Eigen::Matrix3d Math::scewSymmetric(Eigen::Vector3d t)
     {
         Eigen::Matrix3d t_hat;
@@ -20,14 +21,17 @@ namespace RCD
             -t(1), t(0), 0;
         return t_hat;
     }
+    // 求反对称矩阵所对应的向量
     Eigen::Vector3d Math::scewSymmetricInverse(Eigen::Matrix3d m)
     {
         return Eigen::Vector3d( (m(2,1)-m(1,2))/2.0, (m(0,2) - m(2,0))/2.0, (m(1,0) - m(0,1))/2.0 );
     }
+    // 获取RcRdTwd的导数
     Eigen::Vector3d Math::deriv_RcRdTwd(Eigen::Vector3d RcRdTwd_prev,Eigen::Vector3d RcRdTwd_cur, double dt)
     {
         return  (RcRdTwd_cur - RcRdTwd_prev)/dt;
     }
+    // 获取期望的机身位置
     Eigen::Vector3d Math::get_pDesiredTrajectory(Eigen::Vector3d p_d0_, double t_real)
     {
         Eigen::Vector3d p_d;
@@ -68,10 +72,12 @@ namespace RCD
         // p_d(2) = p_d0_(2) -(0.03- 0.03*cos(2*M_PI*freq*t_real));
         return p_d;
     }
+    // 获取期望的机身速度
     Eigen::Vector3d Math::get_dpDesiredTrajectory(Eigen::Vector3d p_d0_,Eigen::Vector3d p_d_cur, double dt, double t_real)
     {
         return (get_pDesiredTrajectory(p_d0_, t_real) - p_d_cur)/dt;
     }  
+    // 获取期望的机身加速度
     Eigen::Vector3d Math::get_ddpDesiredTrajectory(Eigen::Vector3d p_d0_,Eigen::Vector3d p_d_cur,Eigen::Vector3d dp_d_cur, double dt, double t_real)
     {
 
@@ -79,6 +85,7 @@ namespace RCD
     }    
 
     // Orientation
+    // 获取期望的旋转矩阵
     Eigen::Matrix3d Math::get_RDesiredRotationMatrix(Eigen::Quaterniond Q_0, double t_real)
     {
         Eigen::Quaterniond temp = Q_0;
@@ -86,15 +93,17 @@ namespace RCD
         temp.normalize();
         return temp.toRotationMatrix(); 
     }
+    // 获取机身期望的方向导数
     Eigen::Matrix3d Math::get_dRDesiredRotationMatrix(Eigen::Quaterniond Q_0, Eigen::Matrix3d R_cur,double dt, double t_real)
     {
         return (get_RDesiredRotationMatrix(Q_0, t_real) - R_cur)/ dt;
     }
+    // 获取机身的速度
     Eigen::Vector3d Math::get_dp_CoM(Eigen::Vector3d com_p_prev,Eigen::Vector3d com_p_cur,double dt)
     {
         return (com_p_cur - com_p_prev )/dt;
     }
-
+    // 获取机身的方向导数
     Eigen::Matrix3d Math::get_dR_CoM(Eigen::Matrix3d R_CoM_prev,Eigen::Matrix3d R_CoM_cur, double dt)
     {
         return (R_CoM_cur - R_CoM_prev)/dt;
